@@ -520,7 +520,7 @@ const App: React.FC = () => {
                     <select
                       required
                       value={newTicket.sector}
-                      onChange={(e) => setNewTicket({...newTicket, sector: e.target.value})}
+                      onChange={(e) => setNewTicket({...newTicket, sector: e.target.value, user_name: ''})}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                       <option value="">Selecione um setor</option>
@@ -539,12 +539,20 @@ const App: React.FC = () => {
                       value={newTicket.user_name}
                       onChange={(e) => setNewTicket({...newTicket, user_name: e.target.value})}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                     disabled={!newTicket.sector}
                     >
-                      <option value="">Selecione um usuário</option>
-                      {users.map((user) => (
+                      <option value="">{!newTicket.sector ? 'Primeiro selecione um setor' : 'Selecione um usuário'}</option>
+                      {users
+                        .filter(user => !newTicket.sector || user.sector === newTicket.sector)
+                        .map((user) => (
                         <option key={user.id} value={user.name}>{user.name}</option>
                       ))}
                     </select>
+                    {newTicket.sector && users.filter(user => user.sector === newTicket.sector).length === 0 && (
+                      <p className="text-sm text-amber-600 mt-1">
+                        ⚠️ Nenhum usuário encontrado para o setor "{newTicket.sector}"
+                      </p>
+                    )}
                   </div>
 
                   <div>
