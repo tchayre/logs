@@ -10,10 +10,14 @@ import {
   Users,
   Building2,
   Tag,
-  UserCheck
+  UserCheck,
+  LogOut
 } from 'lucide-react';
+import { LoginForm } from './components/LoginForm';
+import { UserManagement } from './components/UserManagement';
 import { DashboardCharts } from './components/Charts';
 import { exportToExcel } from './utils/excelExport';
+import { authService } from './services/authService';
 import { 
   useTickets, 
   useTechnicians, 
@@ -34,12 +38,14 @@ const ConnectionStatus: React.FC = () => {
 
 // Componente principal
 const App: React.FC = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(authService.isAuthenticated());
   const [activeTab, setActiveTab] = useState('tickets');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [showTicketForm, setShowTicketForm] = useState(false);
   const [editingTicket, setEditingTicket] = useState<any>(null);
   const [showManagement, setShowManagement] = useState(false);
+  const [showUserManagement, setShowUserManagement] = useState(false);
   const [managementType, setManagementType] = useState<'technicians' | 'sectors' | 'categories' | 'users'>('technicians');
 
   // Hooks do Supabase
@@ -64,6 +70,22 @@ const App: React.FC = () => {
   });
 
   const [newItem, setNewItem] = useState({ name: '', email: '', sector: '' });
+
+  // Função para login
+  const handleLogin = () => {
+    setIsAuthenticated(true);
+  };
+
+  // Função para logout
+  const handleLogout = () => {
+    authService.logout();
+    setIsAuthenticated(false);
+  };
+
+  // Se não estiver autenticado, mostrar tela de login
+  if (!isAuthenticated) {
+    return <LoginForm onLogin={handleLogin} />;
+  }
 
   // Filtrar tickets
   const filteredTickets = tickets.filter(ticket => {
@@ -216,6 +238,20 @@ const App: React.FC = () => {
               >
                 <Settings className="w-4 h-4" />
                 Gerenciar
+              </button>
+              <button
+                onClick={() => setShowUserManagement(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-100 hover:bg-blue-200 rounded-lg transition-colors"
+              >
+                <Users className="w-4 h-4" />
+                Usuários
+              </button>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors"
+              >
+                <LogOut className="w-4 h-4" />
+                Sair
               </button>
             </div>
           </div>
@@ -749,6 +785,11 @@ const App: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Modal de Gerenciamento de Usuários */}
+      {showUserManagement && (
+        <UserManagement onClose={() => setShowUserManagement(false)} />
       )}
     </div>
   );
